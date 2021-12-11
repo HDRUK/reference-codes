@@ -1,0 +1,36 @@
+name: generate-iso3166-codes
+
+on:
+  schedule:
+  # Run at 00:42 every day
+    - cron:  '30 0 * * *'
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  generate-iso3166-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      
+      - name: Download and Process ISO 3166 JSON codes
+        run: bash scripts/iso3166.sh
+
+      - name: Commit extracts to main branch
+        uses: stefanzweifel/git-auto-commit-action@v4.1.6
+        with:
+          commit_message: Commit new codes if any detected
+          branch: ${{ github.head_ref }}
+          file_pattern: data/iso_3166*.*
+          commit_user_name: Susheel Varma
+          commit_user_email: susheel.varma@hdruk.ac.uk
+          commit_author: Susheel Varma <susheel.varma@hdruk.ac.uk>
